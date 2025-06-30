@@ -53,22 +53,24 @@ def fulfil():
     for order in all_orders:
         if order.fulfilled is False or order.collected is False:
             current_orders.append(order)
-    options_to_fulfil = []
-    options_to_collect = []
+    options_to_fulfil = ['']
+    options_to_collect = ['']
     for order in current_orders:
         if order.fulfilled is False:
             options_to_fulfil.append(order.number)
         elif order.fulfilled is True and order.collected is False:
             options_to_collect.append(order.number)
     form.order_to_fulfil.choices = options_to_fulfil
+    form.order_to_fulfil.default = ''
     form.order_to_collect.choices = options_to_collect
+    form.order_to_collect.default = ''
     if request.method == "POST":
-        if request.form["order_to_fulfil"]:
+        if request.form.get("order_to_fulfil"):
             order_number_to_fulfil = int(request.form["order_to_fulfil"])
             for order in current_orders:
                 if order.number == order_number_to_fulfil:
                     order.fulfil()
-        elif request.form["order_to_collect"]:
+        elif request.form.get("order_to_collect"):
             order_number_to_collect = int(request.form["order_to_collect"])
             for order in current_orders:
                 if order.number == order_number_to_collect:
@@ -86,10 +88,10 @@ def view_orders():
     with open("all_orders.pkl", "rb") as f:
         all_orders = pickle.load(f)
     for order in all_orders:
-        if order.fulfilled is True:
+        if order.fulfilled is True and order.collected is False:
             completed_orders.append(order.number)
             completed_orders.sort()
-        else:
+        elif order.collected is False:
             uncompleted_orders.append(order.number)
             uncompleted_orders.sort()
     return render_template("view_orders.html", completed_orders = completed_orders, uncompleted_orders = uncompleted_orders)
@@ -98,8 +100,6 @@ def view_orders():
 def wipe_history():
     with open("all_orders.pkl", "wb") as f:
         pickle.dump([], f)
-    # with open("current_orders.pkl", "wb") as f:
-    #     pickle.dump([], f)
     return redirect(url_for("debug"))
 
 
