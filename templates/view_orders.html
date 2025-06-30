@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<b> Ready to collect: </b>
+<br>
+{% for order in completed_orders %}
+{{order}},
+{% endfor %}
+
+<br>
+<br>
+<b> Still being made:</b>
+<br>
+{%for order in uncompleted_orders%}
+{{order}},
+{% endfor %}
+</body>
+</html>
