@@ -7,5 +7,5 @@ class new_order_form(Form):
     submit = SubmitField("Submit")
 
 class fulfil_form(Form):
-    order_to_fulfil = SelectField("Which order to fulfil")
+    order_to_fulfil = SelectField("Which order to fulfil", choices=[])
     submit = SubmitField("Submit")
