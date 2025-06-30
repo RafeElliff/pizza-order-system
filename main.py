@@ -26,7 +26,7 @@ def order():
         order_contents["margarita"] = margarita
         order_contents["pepperoni"] = pepperoni
         total_price_of_order = price_calc(order_contents)
-        new_order = Order(order_contents, total_price_of_order, 0, False, time.strftime("%X"), 0)
+        new_order = Order(order_contents, total_price_of_order, -1, False, time.strftime("%X"), 0, time.time())
         with open("all_orders.pkl", "rb") as f:
             all_orders = pickle.load(f)
         new_order.number = len(all_orders) + 1
@@ -44,6 +44,8 @@ def fulfil():
     form = fulfil_form(request.form)
     with open("current_orders.pkl", "rb") as f:
         current_orders = pickle.load(f)
+    with open("all_orders.pkl", "rb") as f:
+        all_orders = pickle.load(f)
     current_order_numbers = []
     for item in current_orders:
         current_order_numbers.append(item.number)
@@ -53,9 +55,16 @@ def fulfil():
         for order in current_orders:
             if int(order.number) == order_number_to_fulfil:
                 current_orders.remove(order)
+                order.fulfil()
             with open("current_orders.pkl", "wb") as f:
                 pickle.dump(current_orders, f)
+        for order in all_orders:
+            if int(order.number) == order_number_to_fulfil:
+                order.fulfil()
+            with open("all_orders.pkl", "wb") as f:
+                pickle.dump(all_orders, f)
         return redirect(url_for("fulfil"))
+
     return render_template("fulfil.html", form=form)
 
 
@@ -66,6 +75,14 @@ def wipe_history():
     with open("current_orders.pkl", "wb") as f:
         pickle.dump([], f)
     return redirect(url_for("debug"))
+
+
+@app.route("/see_all_data")
+def see_all_data():
+    with open("all_orders.pkl", "rb") as f:
+        all_orders = pickle.load(f)
+    return render_template("see_all_data.html", all_orders=all_orders)
+
 
 @app.route("/debug")
 def debug():

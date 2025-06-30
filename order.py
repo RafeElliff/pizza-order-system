@@ -11,14 +11,16 @@ def price_calc(contents):
 
 
 class Order():
-    def __init__ (self, contents, price, number, fulfilled, time_of_order, time_of_fulfilment):
+    def __init__ (self, contents, price, number, fulfilled, time_of_order, time_of_fulfilment, wait_time):
         self.contents = contents
         self.price = price
         self.number = number
         self.fulfilled = fulfilled
         self.time_of_order = time_of_order
         self.time_of_fulfilment = time_of_fulfilment
+        self.wait_time = wait_time
 
     def fulfil(self):
         self.fulfilled = True
         self.time_of_fulfilment = time.strftime("%X")
+        self.wait_time = round(time.time() - self.wait_time, 1)
