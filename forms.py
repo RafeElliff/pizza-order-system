@@ -2,7 +2,7 @@ from wtforms import Form, IntegerField, SubmitField, SelectField
 
 
 class new_order_form(Form):
-    margarita = IntegerField("Margarita")
+    cheese = IntegerField("Cheese")
     pepperoni = IntegerField("Pepperoni")
     submit = SubmitField("Submit")
 

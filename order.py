@@ -1,7 +1,7 @@
 import time
 def price_calc(contents):
     total_price = 0
-    prices = {"margarita": 5, "pepperoni": 6}
+    prices = {"cheese": 5, "pepperoni": 6}
     for product in contents:
         product_count = contents[product]
         product_price_per = prices[product]

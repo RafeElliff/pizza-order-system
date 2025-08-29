@@ -1,10 +1,42 @@
 import time
 import pickle
+import pyperclip
 from flask import Flask, render_template, request, redirect, url_for
 from forms import new_order_form, fulfil_form
 from order import Order, price_calc
 
 app = Flask(__name__)
+
+def print_logic(order_contents_dict, order_number):
+    order_items_list = []
+    for index in range(0, order_contents_dict["cheese"]):
+        order_items_list.append("Cheese")
+    for index in range(0, order_contents_dict["pepperoni"]):
+        order_items_list.append("Pepperoni")
+    order_contents_for_customer_copy = ", ".join(order_items_list)
+    customer_copy = f"""Customer Copy
+{order_contents_for_customer_copy}
+Order {order_number}
+------------------
+"""
+    business_copy = ""
+    print(order_items_list)
+    for order in order_items_list:
+        other_pizzas = []
+        for item in order_items_list:
+            other_pizzas.append(item)
+        other_pizzas.remove(order)
+        other_pizzas_string = ", ".join(other_pizzas)
+        individual_label = f"""Order {order_number}
+{order}
+Order also includes:
+{other_pizzas_string}
+-------------------
+"""
+        business_copy = business_copy + individual_label
+    total_print = customer_copy + business_copy
+
+    pyperclip.copy(total_print)
 
 
 @app.route('/')
@@ -16,16 +48,16 @@ def index():
 def order():
     form = new_order_form(request.form)
     order_contents = {}
-    margarita = 0
+    cheese = 0
     pepperoni = 0
     if request.method == "POST":
-        if request.form["margarita"]:
-            margarita = int(request.form["margarita"])
+        if request.form["cheese"]:
+            cheese = int(request.form["cheese"])
         if request.form["pepperoni"]:
             pepperoni = int(request.form["pepperoni"])
-        if margarita == 0 and pepperoni == 0:
+        if cheese == 0 and pepperoni == 0:
             return redirect(url_for("order"))
-        order_contents["margarita"] = margarita
+        order_contents["cheese"] = cheese
         order_contents["pepperoni"] = pepperoni
         total_price_of_order = price_calc(order_contents)
         new_order = Order(order_contents, total_price_of_order, -1, False, False, time.strftime("%X"), 0, time.time())
@@ -33,16 +65,11 @@ def order():
             all_orders = pickle.load(f)
         new_order.number = len(all_orders) + 1
         all_orders.append(new_order)
+        print_logic(order_contents, new_order.number)
         with open("all_orders.pkl", "wb") as f:
             pickle.dump(all_orders, f)
-        # with open("current_orders.pkl", "rb") as f:
-        #     current_orders = pickle.load(f)
-        # current_orders.append(new_order)
-        # with open("current_orders.pkl", "wb") as f:
-        #     pickle.dump(current_orders, f)
         return redirect(url_for("order"))
     return render_template("order.html", form=form)
-
 
 @app.route('/fulfil', methods=["GET", "POST"])
 def fulfil():
@@ -81,6 +108,7 @@ def fulfil():
 
     return render_template("fulfil.html", form=form)
 
+
 @app.route("/view_orders")
 def view_orders():
     completed_orders = []
@@ -94,7 +122,8 @@ def view_orders():
         elif order.collected is False:
             uncompleted_orders.append(order.number)
             uncompleted_orders.sort()
-    return render_template("view_orders.html", completed_orders = completed_orders, uncompleted_orders = uncompleted_orders)
+    return render_template("view_orders.html", completed_orders=completed_orders, uncompleted_orders=uncompleted_orders)
+
 
 @app.route("/wipe_history")
 def wipe_history():
@@ -108,6 +137,7 @@ def see_all_data():
     with open("all_orders.pkl", "rb") as f:
         all_orders = pickle.load(f)
     return render_template("see_all_data.html", all_orders=all_orders)
+
 
 @app.route("/debug")
 def debug():
